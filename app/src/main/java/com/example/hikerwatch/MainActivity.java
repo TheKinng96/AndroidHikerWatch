@@ -8,12 +8,18 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -81,5 +87,42 @@ public class MainActivity extends AppCompatActivity {
         TextView accuracy = findViewById(R.id.accuracy);
         TextView altitude = findViewById(R.id.altitude);
         TextView address = findViewById(R.id.address);
+
+        latitude.setText("Latitude: " + Double.toString(location.getLatitude()));
+        longitude.setText("Longitude: " + Double.toString(location.getLongitude()));
+        accuracy.setText("Accuracy: " + Double.toString(location.getAccuracy()));
+        altitude.setText("Altitute: " + Double.toString(location.getAltitude()));
+
+        String addressMessage = "Could not find address :(";
+
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+
+        try {
+            List<Address> listAddresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(),1);
+
+            if (listAddresses != null && listAddresses.size() > 0) {
+                addressMessage = "Address:\n ";
+
+                if (listAddresses.get(0).getThoroughfare() != null) {
+                    addressMessage += listAddresses.get(0).getThoroughfare() + "\n";
+                }
+
+                if (listAddresses.get(0).getLocality() != null) {
+                    addressMessage += listAddresses.get(0).getLocality() + " ";
+                }
+
+                if (listAddresses.get(0).getPostalCode() != null) {
+                    addressMessage += listAddresses.get(0).getPostalCode() + " ";
+                }
+
+                if (listAddresses.get(0).getAdminArea() != null) {
+                    addressMessage += listAddresses.get(0).getAdminArea() ;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        address.setText(addressMessage);
     }
 }
